@@ -40,13 +40,16 @@ jobs:
       - name: generate benchmark result
         run: |
           body=$(julia -e '
-          using BenchmarkCI
-
-          let
-              judgement = BenchmarkCI._loadjudge(BenchmarkCI.DEFAULT_WORKSPACE)
-              title = "Benchmark Result"
-              ciresult = BenchmarkCI.CIResult(; judgement, title)
-              BenchmarkCI.printcommentmd(stdout::IO, ciresult)
+          try
+              using BenchmarkCI
+              let
+                  judgement = BenchmarkCI._loadjudge(BenchmarkCI.DEFAULT_WORKSPACE)
+                  title = "Benchmark Result"
+                  ciresult = BenchmarkCI.CIResult(; judgement, title)
+                  BenchmarkCI.printcommentmd(stdout::IO, ciresult)
+              end
+          catch err
+              println("Benchmark skipped: $(err)")
           end
           ')
           body="${body//'%'/'%25'}"
