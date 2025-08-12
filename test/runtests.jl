@@ -24,7 +24,8 @@ end
 
 println("Starting tests with $(Threads.nthreads()) threads out of `Sys.CPU_THREADS = $(Sys.CPU_THREADS)`...")
 
-@run_package_tests filter=testfilter default_usings=true
+# Use keyword object per TestItemRunner API to avoid Invalid argument on older versions
+@run_package_tests(; filter=testfilter, default_usings=true)
 
 # Smoke test: ensure the module initializes and the marker type exists.
 @testitem "LEMON init and marker" begin
