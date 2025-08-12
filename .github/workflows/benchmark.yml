@@ -29,7 +29,11 @@ jobs:
             catch err
               @info "BenchmarkCI.judge failed (likely missing baseline)" err=err
             end
-            BenchmarkCI.displayjudgement()
+            try
+              BenchmarkCI.displayjudgement()
+            catch err
+              @info "BenchmarkCI.displayjudgement failed (no results)" err=err
+            end
             '
 
       # generate and record the benchmark result as markdown
