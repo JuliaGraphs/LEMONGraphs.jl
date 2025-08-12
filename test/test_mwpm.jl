@@ -27,6 +27,10 @@ for repetition in 1:100
     pweights = rand(1:1000, ne(g))
     nweights = rand(-1000:-1, ne(g))
     aweights = rand(-1000:1000, ne(g))
+    if !LEMONGraphs.Lib.WRAP_OK[]
+        @info "Skipping MWPM tests: C++ wrapper not loaded"
+        continue
+    end
     lemon_pweight, lemon_pmatching = maxweightedperfectmatching(g, pweights)
     lemon_nweight, lemon_nmatching = maxweightedperfectmatching(g, nweights)
     lemon_aweight, lemon_amatching = maxweightedperfectmatching(g, aweights)

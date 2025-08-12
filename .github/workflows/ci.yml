@@ -55,6 +55,7 @@ jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
+    if: false # disable docs build until docs/ is added back
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v1

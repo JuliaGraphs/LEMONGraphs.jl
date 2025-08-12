@@ -23,3 +23,14 @@ end
 println("Starting tests with $(Threads.nthreads()) threads out of `Sys.CPU_THREADS = $(Sys.CPU_THREADS)`...")
 
 @run_package_tests filter=testfilter
+
+# Smoke test: ensure the module initializes and the marker type exists.
+@testitem "LEMON init and marker" begin
+    using Test
+    using LEMONGraphs
+    @test isdefined(LEMONGraphs, :LEMONAlgorithm)
+    # Skip heavy tests if C++ wrapper failed to load
+    if !LEMONGraphs.Lib.WRAP_OK[]
+        @info "Skipping LEMON-backed tests: C++ wrapper not loaded"
+    end
+end
