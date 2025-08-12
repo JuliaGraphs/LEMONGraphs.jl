@@ -1,6 +1,8 @@
 using LEMONGraphs
 using TestItemRunner
 import Pkg
+using Graphs
+using GraphsInterfaceChecker
 
 if Sys.islinux() && Sys.ARCH == :x86_64
     Pkg.add("BlossomV")
@@ -29,4 +31,15 @@ println("Starting tests with $(Threads.nthreads()) threads out of `Sys.CPU_THREA
     using Test
     using LEMONGraphs
     @test isdefined(LEMONGraphs, :LEMONAlgorithm)
+end
+
+# Placeholder interface check to ratchet compliance.
+@testitem "Graphs interface checker placeholder" begin
+    # We will introduce a concrete LEMON-backed graph type later.
+    # For now, just confirm Graphs is loaded and basic constructors work.
+    g = Graphs.SimpleGraph(4)
+    Graphs.add_edge!(g, 1, 2)
+    Graphs.add_edge!(g, 3, 4)
+    @test Graphs.nv(g) == 4
+    @test Graphs.ne(g) == 2
 end
