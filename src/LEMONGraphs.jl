@@ -14,29 +14,58 @@ struct LEMONAlgorithm end
 module Lib
   using CxxWrap
   import LEMON_jll
-  @wrapmodule(LEMON_jll.get_liblemoncxxwrap_path)
+  const WRAP_OK = Ref(false)
+  const SHOULD_LOAD_WRAP = get(ENV, "LEMONGRAPHS_LOAD_WRAP", "1") == "1"
 
-  function __init__()
-    @initcxx
+  if SHOULD_LOAD_WRAP
+    try
+      @wrapmodule(LEMON_jll.get_liblemoncxxwrap_path)
+      WRAP_OK[] = true
+    catch err
+      @warn "LEMONGraphs: failed to load LEMON C++ wrapper; functionality disabled" error=err
+      WRAP_OK[] = false
+    end
+  else
+    @info "LEMONGraphs: skipping C++ wrapper load due to LEMONGRAPHS_LOAD_WRAP=0"
+    WRAP_OK[] = false
   end
 
-  id(n::ListGraphNodeIt) = id(convert(ListGraphNode, n))
-  id(n::ListGraphEdgeIt) = id(convert(ListGraphEdge, n))
-  id(n::ListDigraphNodeIt) = id(convert(ListDigraphNode, n))
+  function __init__()
+    if WRAP_OK[]
+      @initcxx
+    end
+  end
+
+  if isdefined(@__MODULE__, :ListGraphNodeIt) && isdefined(@__MODULE__, :ListGraphNode)
+    id(n::ListGraphNodeIt) = id(convert(ListGraphNode, n))
+  end
+  if isdefined(@__MODULE__, :ListGraphEdgeIt) && isdefined(@__MODULE__, :ListGraphEdge)
+    id(n::ListGraphEdgeIt) = id(convert(ListGraphEdge, n))
+  end
+  if isdefined(@__MODULE__, :ListDigraphNodeIt) && isdefined(@__MODULE__, :ListDigraphNode)
+    id(n::ListDigraphNodeIt) = id(convert(ListDigraphNode, n))
+  end
   # not defined in the c++ wrapper
-  #id(n::ListDigraphArcIt) = id(convert(ListDigraphArc, n))
+  # if isdefined(@__MODULE__, :ListDigraphArcIt) && isdefined(@__MODULE__, :ListDigraphArc)
+  #   id(n::ListDigraphArcIt) = id(convert(ListDigraphArc, n))
+  # end
 end
 
 # Conversion helpers between Graphs.jl graphs and LEMON ListGraph.
 # Returns the created LEMON graph and the corresponding node/edge handles.
 function toListGraph(sourcegraph::Graph)
+    if !Lib.WRAP_OK[]
+        error("LEMONGraphs Lib is not available; failed to load C++ wrapper")
+    end
     g = Lib.ListGraph()
     ns = [Lib.addNode(g) for i in vertices(sourcegraph)]
     es = [Lib.addEdge(g,ns[src],ns[dst]) for (;src, dst) in edges(sourcegraph)]
     return (g,ns,es)
 end
 
-Lib.ListGraph(sourcegraph::Graph) = toListGraph(sourcegraph)[1]
+if Lib.WRAP_OK[] && isdefined(Lib, :ListGraph)
+    Lib.ListGraph(sourcegraph::Graph) = toListGraph(sourcegraph)[1]
+end
 
 function maxweightedperfectmatching(graph::Graph, weights::AbstractVector{<:Integer})
     g,ns,es = toListGraph(graph)
