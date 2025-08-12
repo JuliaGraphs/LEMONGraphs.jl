@@ -61,7 +61,10 @@ function toListGraph(sourcegraph::Graph)
     return (g,ns,es)
 end
 
-Lib.ListGraph(sourcegraph::Graph) = toListGraph(sourcegraph)[1]
+# Only extend the C++ constructor when the wrapper has been loaded
+if Lib.WRAP_OK[] && isdefined(Lib, :ListGraph)
+    Lib.ListGraph(sourcegraph::Graph) = toListGraph(sourcegraph)[1]
+end
 
 function maxweightedperfectmatching(graph::Graph, weights::AbstractVector{<:Integer})
     g,ns,es = toListGraph(graph)
