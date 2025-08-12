@@ -24,26 +24,46 @@ jobs:
         run: |
           julia -e '
             using BenchmarkCI
+            success = true
             try
               BenchmarkCI.judge()
             catch err
               @info "BenchmarkCI.judge failed (likely missing baseline)" err=err
-              # allow workflow to continue
+              success = false
             end
-            BenchmarkCI.displayjudgement()
+            if success
+              try
+                BenchmarkCI.displayjudgement()
+              catch err
+                @info "BenchmarkCI.displayjudgement failed (no results)" err=err
+                success = false
+              end
+            end
+            if !success
+              mkpath(".benchmarkci")
+              open(".benchmarkci/result-target.json", "w") do io
+                write(io, "{}")
+              end
+              open("benchmark-result.artifact", "w") do io
+                write(io, "Benchmark skipped on fork: missing baseline")
+              end
+            end
             '
 
       # generate and record the benchmark result as markdown
       - name: generate benchmark result
         run: |
           body=$(julia -e '
-          using BenchmarkCI
-
-          let
-              judgement = BenchmarkCI._loadjudge(BenchmarkCI.DEFAULT_WORKSPACE)
-              title = "Benchmark Result"
-              ciresult = BenchmarkCI.CIResult(; judgement, title)
-              BenchmarkCI.printcommentmd(stdout::IO, ciresult)
+          try
+              using BenchmarkCI
+              let
+                  judgement = BenchmarkCI._loadjudge(BenchmarkCI.DEFAULT_WORKSPACE)
+                  title = "Benchmark Result"
+                  ciresult = BenchmarkCI.CIResult(; judgement, title)
+                  BenchmarkCI.printcommentmd(stdout::IO, ciresult)
+              end
+          catch err
+              println("Benchmark skipped: $(err)")
           end
           ')
           body="${body//'%'/'%25'}"
