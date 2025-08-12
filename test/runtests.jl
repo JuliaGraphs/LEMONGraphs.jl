@@ -29,4 +29,8 @@ println("Starting tests with $(Threads.nthreads()) threads out of `Sys.CPU_THREA
     using Test
     using LEMONGraphs
     @test isdefined(LEMONGraphs, :LEMONAlgorithm)
+    # Skip heavy tests if C++ wrapper failed to load
+    if !LEMONGraphs.Lib.WRAP_OK[]
+        @info "Skipping LEMON-backed tests: C++ wrapper not loaded"
+    end
 end
