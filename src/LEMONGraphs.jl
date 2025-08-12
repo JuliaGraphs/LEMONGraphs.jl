@@ -3,6 +3,14 @@ module LEMONGraphs
 import Graphs
 import Graphs: Graph, Edge, vertices, edges, nv, ne
 
+# Marker type to request LEMON-backed algorithm dispatch from
+# packages that extend Graphs.jl algorithms.
+#
+# Example usage pattern (in client code):
+#   shortest_paths(g::AbstractGraph, s, ::LEMONAlgorithm)
+# The method would be defined in this package to call into the C++ LEMON impl.
+struct LEMONAlgorithm end
+
 module Lib
   using CxxWrap
   import LEMON_jll
@@ -19,6 +27,8 @@ module Lib
   #id(n::ListDigraphArcIt) = id(convert(ListDigraphArc, n))
 end
 
+# Conversion helpers between Graphs.jl graphs and LEMON ListGraph.
+# Returns the created LEMON graph and the corresponding node/edge handles.
 function toListGraph(sourcegraph::Graph)
     g = Lib.ListGraph()
     ns = [Lib.addNode(g) for i in vertices(sourcegraph)]
