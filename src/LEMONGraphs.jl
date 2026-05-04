@@ -4,7 +4,7 @@ import Graphs
 import Graphs: 
     Graph, DiGraph, Edge, vertices, edges, nv, ne, src, dst, 
     has_vertex, has_edge, inneighbors, outneighbors, is_directed, 
-    edgetype, AbstractGraph, maxweightedperfectmatching
+    edgetype, AbstractGraph
 
 using CxxWrap
 
