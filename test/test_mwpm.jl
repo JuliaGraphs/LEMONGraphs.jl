@@ -27,9 +27,9 @@ for repetition in 1:100
     pweights = rand(1:1000, ne(g))
     nweights = rand(-1000:-1, ne(g))
     aweights = rand(-1000:1000, ne(g))
-    lemon_pweight, lemon_pmatching = maxweightedperfectmatching(g, pweights)
-    lemon_nweight, lemon_nmatching = maxweightedperfectmatching(g, nweights)
-    lemon_aweight, lemon_amatching = maxweightedperfectmatching(g, aweights)
+    lemon_pweight, lemon_pmatching = maxweightedperfectmatching(g, pweights, LEMONGraphs.LEMONAlgorithm())
+    lemon_nweight, lemon_nmatching = maxweightedperfectmatching(g, nweights, LEMONGraphs.LEMONAlgorithm())
+    lemon_aweight, lemon_amatching = maxweightedperfectmatching(g, aweights, LEMONGraphs.LEMONAlgorithm())
 
     pweightsdict = Dict{Edge,Int}()
     nweightsdict = Dict{Edge,Int}()
@@ -43,9 +43,9 @@ for repetition in 1:100
     for (e,w) in zip(edges(g),aweights)
         aweightsdict[e] = w
     end
-    lemon_pweight_d, lemon_pmatching_d = maxweightedperfectmatching(g, pweightsdict)
-    lemon_nweight_d, lemon_nmatching_d = maxweightedperfectmatching(g, nweightsdict)
-    lemon_aweight_d, lemon_amatching_d = maxweightedperfectmatching(g, aweightsdict)
+    lemon_pweight_d, lemon_pmatching_d = maxweightedperfectmatching(g, pweightsdict, LEMONGraphs.LEMONAlgorithm())
+    lemon_nweight_d, lemon_nmatching_d = maxweightedperfectmatching(g, nweightsdict, LEMONGraphs.LEMONAlgorithm())
+    lemon_aweight_d, lemon_amatching_d = maxweightedperfectmatching(g, aweightsdict, LEMONGraphs.LEMONAlgorithm())
 
     @test lemon_pweight == lemon_pweight_d
     @test lemon_nweight == lemon_nweight_d
