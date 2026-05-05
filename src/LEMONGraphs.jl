@@ -75,6 +75,11 @@ function to_list_graph(g::Graph)
     return (lg, ns, es)
 end
 
+function to_list_graph(g::AbstractGraph)
+    is_directed(g) && throw(ArgumentError("LEMON matching currently only supports undirected graphs"))
+    return to_list_graph(Graph(g))
+end
+
 function to_list_graph(g::LEMONGraph)
     return (g.graph, g.nodes, g.edges)  # O(1) reuse
 end
@@ -89,6 +94,10 @@ function to_list_digraph(g::DiGraph)
     ns = [Lib.addNode(dg) for _ in Graphs.vertices(g)]
     as = [Lib.addArc(dg, ns[Graphs.src(e)], ns[Graphs.dst(e)]) for e in Graphs.edges(g)]
     return (dg, ns, as)
+end
+
+function to_list_digraph(g::AbstractGraph)
+    return to_list_digraph(DiGraph(g))
 end
 
 function to_list_digraph(g::LEMONDiGraph)
@@ -106,12 +115,22 @@ function LEMONGraph(g::Graph)
     return LEMONGraph(lg, ns, es)
 end
 
+function LEMONGraph(g::AbstractGraph)
+    lg, ns, es = to_list_graph(g)
+    return LEMONGraph(lg, ns, es)
+end
+
 """
     LEMONDiGraph(g::DiGraph) -> LEMONDiGraph
 
 Convert a Graphs.jl DiGraph to a LEMONDiGraph wrapper.
 """
 function LEMONDiGraph(g::DiGraph)
+    dg, ns, as = to_list_digraph(g)
+    return LEMONDiGraph(dg, ns, as)
+end
+
+function LEMONDiGraph(g::AbstractGraph)
     dg, ns, as = to_list_digraph(g)
     return LEMONDiGraph(dg, ns, as)
 end
@@ -171,8 +190,9 @@ end
 
 Compute maximum-weight perfect matching using LEMON backend.
 """
-function maxweightedperfectmatching(g::Graph, weights::AbstractVector{<:Integer}, alg::LEMONAlgorithm)
+function maxweightedperfectmatching(g::AbstractGraph, weights::AbstractVector{<:Integer}, alg::LEMONAlgorithm)
     lg, ns, es = to_list_graph(g)
+    length(weights) == length(es) || throw(DimensionMismatch("expected $(length(es)) edge weights, got $(length(weights))"))
     mapedge = Lib.ListGraphEdgeMapInt(lg)
     for (e, w) in zip(es, weights)
         Lib.set(mapedge, e, w)
@@ -182,8 +202,16 @@ function maxweightedperfectmatching(g::Graph, weights::AbstractVector{<:Integer}
     return Lib.matchingWeight(mwpm), [Lib.id(Lib.mate(mwpm, n)) + 1 for n in ns]
 end
 
-function maxweightedperfectmatching(g::Graph, weights::Dict{E,T}, alg::LEMONAlgorithm) where {E<:Edge,T<:Integer}
+function maxweightedperfectmatching(g::AbstractGraph, weights::Dict{E,T}, alg::LEMONAlgorithm) where {E<:Edge,T<:Integer}
     return maxweightedperfectmatching(g, [weights[e] for e in Graphs.edges(g)], alg)
+end
+
+function maxweightedperfectmatching(g::AbstractGraph, weights::AbstractVector{<:Integer})
+    return maxweightedperfectmatching(g, weights, LEMONAlgorithm())
+end
+
+function maxweightedperfectmatching(g::AbstractGraph, weights::Dict{E,T}) where {E<:Edge,T<:Integer}
+    return maxweightedperfectmatching(g, weights, LEMONAlgorithm())
 end
 
 """

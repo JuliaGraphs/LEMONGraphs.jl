@@ -4,37 +4,41 @@ using LEMONGraphs
 using Graphs
 using GraphsMatching
 
-"""
-    minimum_weight_perfect_matching(g::AbstractGraph, weights, ::LEMONGraphs.LEMONAlgorithm)
+function GraphsMatching.minimum_weight_perfect_matching(
+    g::AbstractGraph,
+    weights::Dict{E,U},
+    ::LEMONGraphs.LEMONAlgorithm;
+) where {E<:Edge,U<:Integer}
+    max_penalty = 2 * abs(maximum(values(weights)))
+    lemon_weights = [-get(weights, e, max_penalty) for e in edges(g)]
+    weight_sum, mate_vec = LEMONGraphs.maxweightedperfectmatching(g, lemon_weights)
+    return GraphsMatching.MatchingResult(-weight_sum, mate_vec)
+end
 
-Compute minimum-weight perfect matching using LEMON backend.
+function GraphsMatching.minimum_weight_perfect_matching(
+    g::AbstractGraph,
+    weights::Dict{E,U},
+    ::LEMONGraphs.LEMONAlgorithm;
+    tmaxscale=10.0,
+) where {E<:Edge,U<:AbstractFloat}
+    scaled = Dict{E,Int32}()
+    cmax = maximum(values(weights))
+    cmin = minimum(values(weights))
+    tmax = typemax(Int32) / tmaxscale
 
-# Arguments
-- `g::AbstractGraph`: input graph
-- `weights`: edge weights (Dict or Vector)
-- `::LEMONAlgorithm`: dispatch marker
-
-# Returns
-- `MatchingResult` with valid spouse mapping and total weight
-"""
-function GraphsMatching.minimum_weight_perfect_matching(g::AbstractGraph, weights, alg::LEMONGraphs.LEMONAlgorithm)
-    # For LEMON: we need to negate weights (since LEMON maximizes, we minimize by negating)
-    if weights isa Dict
-        weights_vec = [-weights[e] for e in edges(g)]
-    else
-        weights_vec = -weights
+    for (e, c) in weights
+        scaled[e] = round(Int32, (c - cmin) / max(cmax - cmin, 1) * tmax)
     end
-    
-    # Call LEMON MWPM with negated weights
-    weight_sum, mate_vec = LEMONGraphs.maxweightedperfectmatching(g, weights_vec, alg)
-    
-    # Convert mate vector to spouse dict expected by GraphsMatching
-    spouse = Dict{Int,Int}()
-    for (i, j) in enumerate(mate_vec)
-        spouse[i] = j
+
+    match = GraphsMatching.minimum_weight_perfect_matching(g, scaled, LEMONGraphs.LEMONAlgorithm())
+    total_weight = zero(U)
+    for i in 1:nv(g)
+        j = match.mate[i]
+        if j > i
+            total_weight += get(weights, E(i, j), zero(U))
+        end
     end
-    
-    return GraphsMatching.MatchingResult(spouse, -weight_sum)  # negate back to get original sum
+    return GraphsMatching.MatchingResult(total_weight, match.mate)
 end
 
 end  # module

@@ -58,12 +58,12 @@ inneighbors(lg, 1), outneighbors(lg, 1)
 
 ### Fast Graph Reuse
 
-O(1) conversion reuse when a graph is already converted:
+O(1) conversion reuse when LEMON-backed algorithms receive an existing `LEMONGraph` or `LEMONDiGraph`:
 
 ```julia
 g = complete_graph(100)
 lg1 = LEMONGraph(g)
-lg2 = LEMONGraph(g)  # Reuses internal LEMON graph (nearly free)
+w, mate = maxweightedperfectmatching(lg1, ones(Int, ne(lg1)))  # Reuses internal LEMON graph
 ```
 
 ### Maximum-Weight Perfect Matching
