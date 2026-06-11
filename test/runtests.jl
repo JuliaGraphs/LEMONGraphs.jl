@@ -1,10 +1,15 @@
 using LEMONGraphs
 using TestItemRunner
+import Pkg
 
-if get(ENV, "JET_TEST", "") == "true"
-    import Pkg
-    Pkg.add(Pkg.PackageSpec(name = "JET", version = "0.11.0"))
+if Sys.islinux() && Sys.ARCH == :x86_64
+    try
+        Pkg.add("BlossomV")
+    catch err
+        @error "BlossomV not available for cross-checks due to error" err
+    end
 end
+
 
 # filter for the test
 testfilter = ti -> begin

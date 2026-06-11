@@ -6,6 +6,29 @@ using LEMONGraphs: maxweightedperfectmatching
 using StableRNGs
 using Test
 
+blossom = if Sys.islinux() && Sys.ARCH == :x86_64
+    try
+        import BlossomV
+        true
+    catch
+        false
+    end
+end
+
+function blossomv_mwpm(g::Graph, weights::AbstractVector{<:Integer})
+    m = BlossomV.Matching(nv(g))
+    wdict = Dict{Tuple{Int,Int},Int}()
+    for (e,w) in zip(edges(g),weights)
+        BlossomV.add_edge(m, e.src-1, e.dst-1, -w)
+        wdict[(e.src,e.dst)] = w
+        wdict[(e.dst,e.src)] = w
+    end
+    BlossomV.solve(m)
+    matches = [BlossomV.get_match(m,i-1)+1 for i in vertices(g)]
+    weight = sum(wdict[(matches[i],i)] for i in 1:nv(g))
+    return weight/2, matches
+end
+
 function brute_force_mwpm_weight(g::Graph, weights::AbstractVector{<:Integer})
     weight_by_edge = Dict{Tuple{Int,Int},Int}()
     for (e, w) in zip(edges(g), weights)
@@ -73,6 +96,18 @@ for repetition in 1:100
     @test lemon_pweight == oracle_pweight
     @test lemon_nweight == oracle_nweight
     @test lemon_aweight == oracle_aweight
+
+    if blossom
+        blossomv_pweight, blossomv_pmatching = blossomv_mwpm(g, pweights)
+        @test lemon_pweight == blossomv_pweight
+        #@test lemon_pmatching == blossomv_pmatching
+        blossomv_nweight, blossomv_nmatching = blossomv_mwpm(g, nweights)
+        @test lemon_nweight == blossomv_nweight
+        #@test lemon_nmatching == blossomv_nmatching
+        blossomv_aweight, blossomv_amatching = blossomv_mwpm(g, aweights)
+        @test lemon_aweight == blossomv_aweight
+        #@test lemon_amatching == blossomv_amatching
+    end
 end
 
 end
