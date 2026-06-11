@@ -2,7 +2,7 @@ using LEMONGraphs
 using TestItemRunner
 import Pkg
 
-if Sys.islinux() && Sys.ARCH == :x86_64
+if Sys.islinux() && Sys.ARCH == :x86_64 && get(ENV,"JET_TEST","")!="true"
     try
         Pkg.add("BlossomV")
     catch err

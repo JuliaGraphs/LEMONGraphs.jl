@@ -13,6 +13,8 @@ blossom = if Sys.islinux() && Sys.ARCH == :x86_64
     catch
         false
     end
+else
+    false
 end
 
 function blossomv_mwpm(g::Graph, weights::AbstractVector{<:Integer})
