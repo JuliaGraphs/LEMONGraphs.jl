@@ -10,6 +10,10 @@ if Sys.islinux() && Sys.ARCH == :x86_64
     end
 end
 
+if get(ENV,"JET_TEST","")=="true"
+    Pkg.add("JET")
+end
+
 
 # filter for the test
 testfilter = ti -> begin
