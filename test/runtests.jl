@@ -2,9 +2,18 @@ using LEMONGraphs
 using TestItemRunner
 import Pkg
 
-if Sys.islinux() && Sys.ARCH == :x86_64
-    Pkg.add("BlossomV")
+if Sys.islinux() && Sys.ARCH == :x86_64 && get(ENV,"JET_TEST","")!="true"
+    try
+        Pkg.add("BlossomV")
+    catch err
+        @error "BlossomV not available for cross-checks due to error" err
+    end
 end
+
+if get(ENV,"JET_TEST","")=="true"
+    Pkg.add("JET")
+end
+
 
 # filter for the test
 testfilter = ti -> begin

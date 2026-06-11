@@ -9,4 +9,3 @@
 - First release.
 - Simple wrapper/converter between Graphs.jl and LEMONGraphs.jl.
 - Wrapper for the MWPM algorithm.
-
