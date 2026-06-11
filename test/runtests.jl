@@ -1,9 +1,9 @@
 using LEMONGraphs
 using TestItemRunner
-import Pkg
 
-if Sys.islinux() && Sys.ARCH == :x86_64
-    Pkg.add("BlossomV")
+if get(ENV, "JET_TEST", "") == "true"
+    import Pkg
+    Pkg.add(Pkg.PackageSpec(name = "JET", version = "0.11.0"))
 end
 
 # filter for the test

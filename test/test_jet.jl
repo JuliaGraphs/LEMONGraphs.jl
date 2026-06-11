@@ -3,5 +3,8 @@
     using Test
     using LEMONGraphs
 
-    JET.test_package(LEMONGraphs, target_defined_modules = true)
+    JET.test_package(
+        LEMONGraphs;
+        target_modules = (LEMONGraphs,),
+    )
 end

@@ -1,5 +1,9 @@
 # News
 
+## [Unreleased]
+
+- Fix CI coverage by avoiding external test downloads and removing stale workflow assumptions.
+
 ## v0.1.1 - 2025-10-10
 
 - Recompile LEMON_jll dependencies for newer versions of Julia
@@ -9,4 +13,3 @@
 - First release.
 - Simple wrapper/converter between Graphs.jl and LEMONGraphs.jl.
 - Wrapper for the MWPM algorithm.
-
