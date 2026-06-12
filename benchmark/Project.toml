@@ -1,2 +1,7 @@
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
+LEMONGraphs = "14b1564f-c77f-4800-9e89-efd961faef7c"
+
+[compat]
+BenchmarkTools = "1"
