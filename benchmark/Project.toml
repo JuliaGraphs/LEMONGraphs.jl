@@ -5,3 +5,4 @@ LEMONGraphs = "14b1564f-c77f-4800-9e89-efd961faef7c"
 
 [compat]
 BenchmarkTools = "1"
+Graphs = "1.12"

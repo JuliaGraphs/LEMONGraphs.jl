@@ -88,9 +88,9 @@ for repetition in 1:100
     for (e,w) in zip(edges(g),aweights)
         aweightsdict[e] = w
     end
-    lemon_pweight_d, lemon_pmatching_d = maxweightedperfectmatching(g, pweightsdict)
-    lemon_nweight_d, lemon_nmatching_d = maxweightedperfectmatching(g, nweightsdict)
-    lemon_aweight_d, lemon_amatching_d = maxweightedperfectmatching(g, aweightsdict)
+    lemon_pweight_d, lemon_pmatching_d = maxweightedperfectmatching(g, pweightsdict, LEMONGraphs.LEMONAlgorithm())
+    lemon_nweight_d, lemon_nmatching_d = maxweightedperfectmatching(g, nweightsdict, LEMONGraphs.LEMONAlgorithm())
+    lemon_aweight_d, lemon_amatching_d = maxweightedperfectmatching(g, aweightsdict, LEMONGraphs.LEMONAlgorithm())
 
     @test lemon_pweight == lemon_pweight_d
     @test lemon_nweight == lemon_nweight_d
